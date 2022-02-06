@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  jobmanager:
+    image: flink:scala_2.12-java11
+    build: ./
+    container_name: jobmanager
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+
+  taskmanager:
+    image: flink:scala_2.12-java11
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+
+  socketserver:
+    image: appropriate/nc:latest
+    hostname: socketserver
+    container_name: socketserver
+    tty: true
+    command: ash
